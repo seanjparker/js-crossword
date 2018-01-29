@@ -1,11 +1,13 @@
 {
   "title": "JSON Structure",
   "userID": 2,
-  "width": 6,
-  "height": 6,
+  "width": 7,
+  "height": 7,
   "data": [
     {"d":"A", "n":1, "x":0, "y":0, "w":"hello", "c":"greeting"},
-    {"d":"D", "n":3, "x":3, "y":0, "w":"low", "c":"small"},
-    {"d":"A", "n":2, "x":3, "y":2, "w":"word", "c":"element of speech"}
+    {"d":"D", "n":5, "x":3, "y":0, "w":"low", "c":"small"},
+    {"d":"A", "n":2, "x":3, "y":2, "w":"word", "c":"element of speech"},
+    {"d":"D", "n":4, "x":1, "y":0, "w":"elegant", "c":"graceful and stylish"},
+    {"d":"A", "n":3, "x":0, "y":5, "w":"elbows", "c":"the joint between the forearm and upper arm"}
   ]
 }

@@ -16,7 +16,7 @@ function crossword() {
     this.container = $('<div class="grid"></div>').appendTo(c);
 
     this.loadCrossword(function() {
-      _this.initGrid()
+      _this.initGrid();
       _this.parseCrosswordData();
       _this.drawGrid();
       _this.setKeyHandlers();
@@ -39,7 +39,7 @@ function crossword() {
     for (var y = 0; y < this.height; y++) {
       this.grid[y] = [];
       for (var x = 0; x < this.width; x++) {
-        this.grid[y][x] = new cell(x, y, false, 'undefined', 'undefined');
+        this.grid[y][x] = new cell(x, y, false);
       }
     }
   }
@@ -66,6 +66,7 @@ function crossword() {
         this.grid[yOff][xOff].isWhite = true;
       }
     }
+
   }
 
   this.drawGrid = function() {
