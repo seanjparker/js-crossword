@@ -105,21 +105,16 @@ function crossword() {
   }
 
   this.drawClues = function() {
-    var cluediv = $('<div class="clues"></div>').appendTo('#crosswordStart');
-    cluediv.append('<h4 class="cluelabel">Across</h4>');
-    var aol = $('<div class="across scroll-pane"></div>').appendTo(cluediv);
-    cluediv.append('<h4 class="cluelabel">Down</h4>');
-    var dol = $('<div class="down scroll-pane"></div>').appendTo(cluediv);
+    var clueDiv = $('<div class="clues"></div>').appendTo('#crosswordStart');
+    clueDiv.append('<h4 class="cluelabel">Across</h4>');
+    var acrossList = $('<div class="across scroll-pane"></div>').appendTo(clueDiv);
+    clueDiv.append('<h4 class="cluelabel">Down</h4>');
+    var downList = $('<div class="down scroll-pane"></div>').appendTo(clueDiv);
     for (var key in this.clues) {
       for (var i = 0; i < this.clues[key].length; i++) {
         var clue = this.clues[key][i];
-        var li;
-        if (key == 'A') {
-          li = $('<p></p>').appendTo(aol);
-        } else {
-          li = $('<p></p>').appendTo(dol);
-        }
-        li.addClass('c'+key+clue.n);
+        var li = $('<p></p>').appendTo(key == 'A' ? acrossList : downList);
+        li.addClass('c' + key + clue.n);
         li.text(clue.n + '. ' + clue.c);
       }
     }
@@ -156,15 +151,16 @@ function crossword() {
       this.grid[pos[1]][pos[0]].letter = newLetter;
       $(this.grid[pos[1]][pos[0]].createHTMLForLetter()).appendTo(cell);
     }
+    this.updateActive();
   }
 
-  this.updateActive = function() {
+  this.updateActive = function(pressX, pressY) {
     //Find the active cell
     var cell = $('#cell-active');
     var pos = this.getXAndY(cell);
     var x = parseInt(pos[0]);
     var y = parseInt(pos[1]);
-    if (this.grid[y][x].direction !== 'undefined') {
+    if ((typeof pressX == 'undefined' && typeof pressY == 'undefined') && this.grid[y][x].direction !== 'undefined') {
       //Depending on the direction for the cell, move the active cell if we can
       if (this.grid[y][x].direction === 'A') {
         //Ensure the new x is within the grid bounds
@@ -185,6 +181,15 @@ function crossword() {
           $(".p" + x + "-" + yDelta).attr('id', 'cell-active');
         }
       }
+    } else {
+      var deltaX = x + pressX;
+      var deltaY = y + pressY;
+      if ((deltaX < this.width && deltaY < this.height && deltaX >= 0 && deltaY >= 0) && this.grid[deltaY][deltaX].isWhite) {
+        //Set the cell @ [y][xDelta] to active
+        //Remove the active cell id and move it to the new cell
+        $(".row > div").removeAttr('id', 'cell-active');
+        $(".p" + deltaX + "-" + deltaY).attr('id', 'cell-active');
+      }
     }
   }
 
@@ -201,13 +206,21 @@ function crossword() {
       //When a letter is pressed, update the active cell with that letter
       var character = String.fromCharCode(e.which).toUpperCase();
       _this.updateLetter(character);
-      _this.updateActive();
     });
     $(document).on('keydown', function(e) {
       //When the user presses delete, remove the letter from the cell
       var key = e.key;
-      if (key === 'Backspace' || key === 'Delete')
-        _this.updateLetter('');
+      if (key === 'Backspace' || key === 'Delete') {
+        _this.updateLetter('')
+      } else if (key === 'ArrowUp') {
+        _this.updateActive(0, -1);
+      } else if (key === 'ArrowDown') {
+        _this.updateActive(0, 1);
+      } else if (key === 'ArrowLeft') {
+        _this.updateActive(-1, 0);
+      } else if (key === 'ArrowRight') {
+        _this.updateActive(1, 0);
+      }
     });
   }
 }
