@@ -1,2 +1,2 @@
 # js-crossword
-Javascript browser-based crossword
+Browser-based crossword using JavaScript and jQuery

@@ -1,0 +1,10 @@
+{
+  "title": "JSON Structure",
+  "userID": 2,
+  "width": 10,
+  "height": 10,
+  "data": [
+    {"d":"A", "n":1, "x":0, "y":0, "w":"word1", "c":"clue1"},
+    {"d":"D", "n":2, "x":2, "y":2, "w":"word2", "c":"clue2"},
+  ]
+}
