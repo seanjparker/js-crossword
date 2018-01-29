@@ -10,6 +10,8 @@ function crossword() {
   var _this = this;
 
   this.init = function(crosswordID) {
+    window.innerWidth === window.outerWidth
+
     this.crosswordID = crosswordID;
 
     //The starting place to where we draw the crossword grid
@@ -118,9 +120,11 @@ function crossword() {
         li.text(clue.n + '. ' + clue.c);
       }
     }
-    $(function() {
-      $('.scroll-pane').jScrollPane();
-    });
+    $('.scroll-pane').jScrollPane().bind(
+      'mousewheel',
+      function(e) {
+        e.preventDefault();
+      });
   }
 
   this.checkCrossword = function() {

@@ -8,6 +8,7 @@
     {"d":"D", "n":5, "x":3, "y":0, "w":"low", "c":"small"},
     {"d":"A", "n":2, "x":3, "y":2, "w":"word", "c":"element of speech"},
     {"d":"D", "n":4, "x":1, "y":0, "w":"elegant", "c":"graceful and stylish"},
-    {"d":"A", "n":3, "x":0, "y":5, "w":"enbows", "c":"the joint between the forearm and upper arm"}
+    {"d":"A", "n":3, "x":0, "y":5, "w":"almost", "c":"not quite"},
+    {"d":"D", "n":6, "x":6, "y":0, "w":"android", "c":"a robot with a human appearance"}
   ]
 }
