@@ -9,14 +9,14 @@ function cell(x, y, isWhite, letter, number, direction, correctLetter) {
 
   this.createHTML = function() {
     var bw = this.isWhite ? "white" : "black";
-    var cellData = $('<div class="' + bw + '-box ' + x + '?' + y +'"></div>');
+    var cellData = $('<div class="' + bw + '-box ' + 'p' + x + '-' + y +'"></div>');
     if (this.isWhite) {
       var letterCell = $('<div class="letter"></div>').appendTo(cellData);
       var numberCell = $('<div class="number"></div>').appendTo(cellData);
-      if (this.letter !== undefined) {
+      if (this.letter !== 'undefined') {
         $('<span>' + letter + '</span>').appendTo(letterCell);
       }
-      if (this.number !== undefined) {
+      if (this.number !== 'undefined') {
         $('<span>' + this.number + '</span>').appendTo(numberCell);
       }
     }

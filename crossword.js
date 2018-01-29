@@ -12,9 +12,11 @@ function crossword() {
   this.init = function(crosswordID) {
     this.crosswordID = crosswordID;
 
+    //The starting place to where we draw the crossword grid
     var c = $("#crosswordStart");
     this.container = $('<div class="grid"></div>').appendTo(c);
 
+    //Load the crossword by creating the grid and parsing the json
     this.loadCrossword(function() {
       _this.initGrid()
       _this.parseCrosswordData();
@@ -39,11 +41,15 @@ function crossword() {
     for (var y = 0; y < this.height; y++) {
       this.grid[y] = [];
       for (var x = 0; x < this.width; x++) {
-        this.grid[y][x] = new cell(x, y, false, undefined, undefined);
+        //Create the grid of cells by setting then to all black and empty
+        this.grid[y][x] = new cell(x, y, false, 'undefined', 'undefined');
       }
     }
   }
 
+  //Parsing the crossword data:
+  //We find the clues and words and store the data
+  //Then we set each cell with the correct letter and the x and y co-ords
   this.parseCrosswordData = function() {
     this.clues = [];
     this.words = [];
@@ -56,6 +62,7 @@ function crossword() {
       var x = data[i].x;
       var y = data[i].y;
       var d = data[i].d;
+      //At the start of the word, set the super-script number
       this.grid[y][x].number = data[i].n;
       this.grid[y][x].direction = d;
 
@@ -64,6 +71,14 @@ function crossword() {
         var xOff = x + (d == 'A' ? c : 0);
         this.grid[yOff][xOff].correctLetter = this.words[i][c].toUpperCase();
         this.grid[yOff][xOff].isWhite = true;
+        this.grid[yOff][xOff].direction = d;
+      }
+    }
+  }
+  this.createJSON = function() {
+    for (var y = 0; y < this.height; y++) {
+      for (var x = 0; x < this.width; x++) {
+
       }
     }
   }
@@ -73,6 +88,7 @@ function crossword() {
     for (var y = 0; y < this.height; y++) {
       var row = $('<div class="row"></div>').appendTo(this.container);
       for (var x = 0; x < this.width; x++) {
+        //Makes a call to each cell and it returns the html for that cell
         $(this.grid[y][x].createHTML()).appendTo(row);
       }
     }
@@ -81,6 +97,8 @@ function crossword() {
   this.checkCrossword = function() {
     for (var y = 0; y < this.height; y++) {
       for (var x = 0; x < this.width; x++) {
+        //Check each cell, if one letter doesn't match the correct letter
+        //the crossword solution is incorrect
         if (this.grid[y][x].isWhite && this.grid[y][x].letter !== this.grid[y][x].correctLetter)
           return false;
       }
@@ -89,43 +107,70 @@ function crossword() {
   }
 
   this.getXAndY = function(cellToParse) {
-    return cellToParse.attr('class').split(" ")[1].split("?");
+    //Parse the class name to find the x and y of the cell
+    return cellToParse.attr('class').split(" ")[1].split("p")[1].split("-");
   }
 
   this.updateLetter = function(newLetter) {
+    //When a letter is pressed find the active cell
     var active = $('#cell-active');
     var pos = this.getXAndY(active);
+    //Remove the current letter from the HTML for the cell
     var cell = active.children(".letter").empty();
-
-    if (newLetter !== '' || typeof newLetter == undefined) {
+    //Update the cell with the new letter and create the html
+    if (newLetter !== '' || typeof newLetter == 'undefined') {
       this.grid[pos[1]][pos[0]].letter = newLetter;
       $(this.grid[pos[1]][pos[0]].createHTMLForLetter()).appendTo(cell);
     }
   }
 
   this.updateActive = function() {
-    //var pos = this.getXAndY($('#cell-active'));
-    //var x = parseInt(pos[0]) + this.grid[y][x].direction === "A" ? 1 : 0;
-    //var y = parseInt(pos[1]) + this.grid[y][x].direction === "D" ? 1 : 0;
-    //if (this.grid[y][x].isWhite) {
-    //  $(".row > div").removeAttr('id', 'cell-active');
-    //  $(".row > div").attr('id', 'cell-active');
-    //}
+    //Find the active cell
+    var cell = $('#cell-active');
+    var pos = this.getXAndY(cell);
+    var x = parseInt(pos[0]);
+    var y = parseInt(pos[1]);
+    if (this.grid[y][x].direction !== 'undefined') {
+      //Depending on the direction for the cell, move the active cell if we can
+      if (this.grid[y][x].direction === 'A') {
+        //Ensure the new x is within the grid bounds
+        var xDelta = x += (x + 1 < this.width ? 1 : 0);
+        if (this.grid[y][xDelta].isWhite) {
+          //Set the cell @ [y][xDelta] to active
+          //Remove the active cell id and move it to the new cell
+          $(".row > div").removeAttr('id', 'cell-active');
+          $(".p" + xDelta + "-" + y).attr('id', 'cell-active');
+        }
+      } else if (this.grid[y][x].direction === 'D') {
+        //Ensure the new x is within the grid bounds
+        var yDelta = y += (y + 1 < this.height ? 1 : 0);
+        if (this.grid[yDelta][x].isWhite) {
+          //Set the cell @ [y][xDelta] to active
+          //Remove the active cell id and move it to the new cell
+          $(".row > div").removeAttr('id', 'cell-active');
+          $(".p" + x + "-" + yDelta).attr('id', 'cell-active');
+        }
+      }
+    }
   }
 
   this.setKeyHandlers = function() {
+    //Capture the key press event
     $(".row > div").click(function(e) {
       if($(this).hasClass("white-box")) {
+        //When the user clicks on the white cell, set it to active
         $(".row > div").removeAttr('id', 'cell-active');
         $(this).attr('id', 'cell-active');
       }
     });
     $(document).keypress(function(e) {
+      //When a letter is pressed, update the active cell with that letter
       var character = String.fromCharCode(e.which).toUpperCase();
       _this.updateLetter(character);
       _this.updateActive();
     });
     $(document).on('keydown', function(e) {
+      //When the user presses delete, remove the letter from the cell
       var key = e.key;
       if (key === 'Backspace' || key === 'Delete')
         _this.updateLetter('');
