@@ -10,8 +10,6 @@ function crossword() {
   var _this = this;
 
   this.init = function(crosswordID) {
-    window.innerWidth === window.outerWidth
-
     this.crosswordID = crosswordID;
 
     //The starting place to where we draw the crossword grid
@@ -24,6 +22,7 @@ function crossword() {
       _this.parseCrosswordData();
       _this.drawGrid();
       _this.drawClues();
+      _this.drawButtons();
       _this.setKeyHandlers();
     });
   }
@@ -87,12 +86,77 @@ function crossword() {
       }
     }
   }
-  this.createJSON = function() {
+  this.createJSON = function(title, userID) {
+    var wordFormed = '';
+    var json = {
+      "title": title,
+      "userID": userID,
+      "width": this.width,
+      "height": this.height,
+      "data": []
+    }
+    currentNumberCount = 0;
     for (var y = 0; y < this.height; y++) {
       for (var x = 0; x < this.width; x++) {
+        var cell = this.grid[y][x];
+        if (cell.letter !== 'undefined') {
 
+          //This finds words that go down and start in the middle of other words
+          var leftFilled = this.boundCheck(x - 1, y) && this.grid[y][x - 1].letter !== 'undefined';
+          var aboveFilled = this.boundCheck(x, y - 1) && this.grid[y - 1][x].letter !== 'undefined';
+
+          if (!leftFilled) {
+            //Go across to find the word
+            wordFormed = this.findWordInDir(x, y, false);
+            //If we formed a full word, we add it to the json
+            if (wordFormed && wordFormed.length > 1) {
+              currentNumberCount++;
+              json.data.push({
+                "d": "A",
+                "n": currentNumberCount,
+                "x": x,
+                "y": y,
+                "w": wordFormed,
+                "c": "clue from input field"
+              });
+            }
+          }
+          if (!aboveFilled) {
+            //Go down to find the word
+            wordFormed = this.findWordInDir(x, y, true);
+            //If we formed a full word, we add it to the json
+            if (wordFormed !== '' && wordFormed.length > 1) {
+              currentNumberCount++;
+              json.data.push({
+                "d": "D",
+                "n": currentNumberCount,
+                "x": x,
+                "y": y,
+                "w": wordFormed,
+                "c": "clue from input field"
+              });
+            }
+          }
+        }
       }
     }
+    return json;
+  }
+
+  //Dir = True -> down
+  //Dir = False -> across
+  this.findWordInDir = function(x, y, dir) {
+    var word = '';
+    while (this.boundCheck(x, y) && this.grid[y][x].letter !== 'undefined') {
+      word += this.grid[y][x].letter;
+      x += (dir ? 0 : 1)
+      y += (dir ? 1 : 0)
+    }
+    if (word.length > 1) console.log(word + "   formed");
+    return word;
+  }
+  this.boundCheck = function(x, y) {
+    return (x < this.width && y < this.height && x >= 0 && y >= 0)
   }
 
   this.drawGrid = function() {
@@ -109,34 +173,83 @@ function crossword() {
   this.drawClues = function() {
     var clueDiv = $('<div class="clues"></div>').appendTo('#crosswordStart');
     clueDiv.append('<h4 class="cluelabel">Across</h4>');
-    var acrossList = $('<div class="across scroll-pane"></div>').appendTo(clueDiv);
+    var acrossList = $('<div class="across"></div>').appendTo(clueDiv);
     clueDiv.append('<h4 class="cluelabel">Down</h4>');
-    var downList = $('<div class="down scroll-pane"></div>').appendTo(clueDiv);
+    var downList = $('<div class="down"></div>').appendTo(clueDiv);
     for (var key in this.clues) {
       for (var i = 0; i < this.clues[key].length; i++) {
         var clue = this.clues[key][i];
         var li = $('<p></p>').appendTo(key == 'A' ? acrossList : downList);
         li.addClass('c' + key + clue.n);
-        li.text(clue.n + '. ' + clue.c);
+        li.text(clue.n + ': ' + clue.c);
       }
     }
-    $('.scroll-pane').jScrollPane().bind(
-      'mousewheel',
-      function(e) {
-        e.preventDefault();
-      });
   }
+
+  //---------------------------------------------------------------------------
+  this.drawButtons = function() {
+    var buttonDiv = $('<div class="buttons"></div>').appendTo('#crosswordStart');
+    buttonDiv.append('<button onclick="crossword_grid.checkCrossword()"> Check All </button>');
+    buttonDiv.append('<button onclick="crossword_grid.clearAll()"> Clear All </button>');
+    buttonDiv.append('<button onclick="crossword_grid.create()"> Create </button>');
+    buttonDiv.append('<button onclick="crossword_grid.submit()"> Submit Crossword </button>');
+  }
+
+
+  //---------------------------------------------------------------------------
 
   this.checkCrossword = function() {
     for (var y = 0; y < this.height; y++) {
       for (var x = 0; x < this.width; x++) {
         //Check each cell, if one letter doesn't match the correct letter
         //the crossword solution is incorrect
-        if (this.grid[y][x].isWhite && this.grid[y][x].letter !== this.grid[y][x].correctLetter)
+        if (this.grid[y][x].isWhite && this.grid[y][x].letter !== this.grid[y][x].correctLetter) {
+          alert("Incorrect");
           return false;
+        }
       }
     }
     return true;
+  }
+  this.clearAll = function() {
+    for (var y = 0; y < this.height; y++) {
+      for (var x = 0; x < this.width; x++) {
+        var cell = $('.p' + x + '-' + y).children(".letter").empty();
+        this.grid[y][x].letter = '';
+      }
+    }
+  }
+  this.create = function() {
+    $('.grid').empty();
+    $('#crosswordStart').children('.clues').empty();
+    for (var y = 0; y < this.height; y++) {
+      for (var x = 0; x < this.width; x++) {
+        var cell = $('.p' + x + '-' + y).children(".letter").empty();
+        this.grid[y][x].letter = 'undefined';
+        this.grid[y][x].correctLetter = 'undefined';
+        this.grid[y][x].number = 'undefined';
+        this.grid[y][x].direction = 'undefined';
+        this.grid[y][x].isWhite = true;
+      }
+    }
+    this.clues = [];
+    this.words = [];
+    $(document).off('keydown');
+    this.drawGrid();
+    this.setKeyHandlers();
+  }
+  this.submit = function() {
+    this.crosswordData = this.createJSON();
+    console.log(this.crosswordData);
+    var c = $("#crosswordStart").empty();
+    this.container = $('<div class="grid"></div>').appendTo(c);
+
+    this.initGrid();
+    this.parseCrosswordData();
+    this.drawGrid();
+    this.drawClues();
+    this.drawButtons();
+    this.setKeyHandlers();
   }
 
   this.getXAndY = function(cellToParse) {
@@ -188,7 +301,7 @@ function crossword() {
     } else {
       var deltaX = x + pressX;
       var deltaY = y + pressY;
-      if ((deltaX < this.width && deltaY < this.height && deltaX >= 0 && deltaY >= 0) && this.grid[deltaY][deltaX].isWhite) {
+      if (this.boundCheck(deltaX, deltaY) && this.grid[deltaY][deltaX].isWhite) {
         //Set the cell @ [y][xDelta] to active
         //Remove the active cell id and move it to the new cell
         $(".row > div").removeAttr('id', 'cell-active');
@@ -213,17 +326,12 @@ function crossword() {
     });
     $(document).on('keydown', function(e) {
       //When the user presses delete, remove the letter from the cell
-      var key = e.key;
-      if (key === 'Backspace' || key === 'Delete') {
-        _this.updateLetter('')
-      } else if (key === 'ArrowUp') {
-        _this.updateActive(0, -1);
-      } else if (key === 'ArrowDown') {
-        _this.updateActive(0, 1);
-      } else if (key === 'ArrowLeft') {
-        _this.updateActive(-1, 0);
-      } else if (key === 'ArrowRight') {
-        _this.updateActive(1, 0);
+      switch (e.key) {
+        case ('Backspace' || 'Delete'): _this.updateLetter(''); break;
+        case 'ArrowUp': _this.updateActive(0, -1); break;
+        case 'ArrowDown': _this.updateActive(0, 1); break;
+        case 'ArrowLeft': _this.updateActive(-1, 0); break;
+        case 'ArrowRight': _this.updateActive(1, 0); break;
       }
     });
   }
