@@ -14,13 +14,17 @@
   $(document).ready(function() {
     crossword_grid = new crossword();
     crossword_grid.init('c1');
+
+    window.onresize = function(event) {
+      crossword_grid.resizeCells();
+    }
   });
 </script>
 <noscript>Please enable JavaScript!</noscript>
 </head>
 
 <body>
-  <div id="crosswordStart">
+  <div class="crossword-start">
   </div>
 </body>
 </html>

@@ -13,7 +13,7 @@ function crossword() {
     this.crosswordID = crosswordID;
 
     //The starting place to where we draw the crossword grid
-    var c = $("#crosswordStart");
+    var c = $(".crossword-start");
     this.container = $('<div class="grid"></div>').appendTo(c);
 
     //Load the crossword by creating the grid and parsing the json
@@ -24,7 +24,26 @@ function crossword() {
       _this.drawClues();
       _this.drawButtons();
       _this.setKeyHandlers();
+      _this.resizeCells();
     });
+  }
+
+  this.resizeCells = function() {
+    var vp = Math.min($(window).width(), $(window).height());
+    var cell = vp / Math.max(this.width, this.height);
+    var cellSize = Math.floor(cell - (cell >> 2));
+
+    var tags = document.getElementsByClassName("box"),
+    total = tags.length;
+    for (var i = 0; i < total; i++ ) {
+      tags[i].style.width = tags[i].style.height = cellSize;
+    }
+    tags = document.getElementsByClassName("letter"),
+    total = tags.length;
+    for (var i = 0; i < total; i++ ) {
+      tags[i].style['font-size'] = (Math.max(0.5, (Math.floor(cell / 20) - 0.5)) + 'em');
+      //tags[i].style.height = cell - (cell >> 2);
+    }
   }
 
   this.loadCrossword = function(loadSuccessful) {
@@ -168,7 +187,7 @@ function crossword() {
   }
 
   this.drawClues = function() {
-    var clueDiv = $('<div class="clues"></div>').appendTo('#crosswordStart');
+    var clueDiv = $('<div class="clues"></div>').appendTo('.crossword-start');
     clueDiv.append('<h4 class="cluelabel">Across</h4>');
     var acrossList = $('<div class="across"></div>').appendTo(clueDiv);
     clueDiv.append('<h4 class="cluelabel">Down</h4>');
@@ -184,7 +203,7 @@ function crossword() {
   }
 
   this.drawButtons = function() {
-    var buttonDiv = $('<div class="buttons"></div>').appendTo('#crosswordStart');
+    var buttonDiv = $('<div class="buttons"></div>').appendTo('.crossword-start');
     buttonDiv.append('<button onclick="crossword_grid.checkCrossword()"> Check All </button>');
     buttonDiv.append('<button onclick="crossword_grid.clearAll()"> Clear All </button>');
     buttonDiv.append('<button onclick="crossword_grid.create()"> Create </button>');
@@ -216,7 +235,7 @@ function crossword() {
   this.create = function() {
     //Clear all the old crossword data
     $('.grid').empty();
-    $('#crosswordStart').children('.clues').empty();
+    $('.crossword-start').children('.clues').empty();
     for (var y = 0; y < this.height; y++) {
       for (var x = 0; x < this.width; x++) {
         var cell = $('.p' + x + '-' + y).children(".letter").empty();
@@ -238,7 +257,7 @@ function crossword() {
     //Create the new crossword data
     this.crosswordData = this.createJSON();
     //Create the new grid
-    var c = $("#crosswordStart").empty();
+    var c = $(".crossword-start").empty();
     this.container = $('<div class="grid"></div>').appendTo(c);
     //Draw the grid, clues and buttons - for the new grid
     this.initGrid();
@@ -255,7 +274,7 @@ function crossword() {
 
   this.getXAndY = function(cellToParse) {
     //Parse the class name to find the x and y of the cell
-    return cellToParse.attr('class').split(" ")[1].split("p")[1].split("-");
+    return cellToParse.attr('class').split(" ")[2].split("p")[1].split("-");
   }
 
   this.updateLetter = function(newLetter) {

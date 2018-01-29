@@ -11,31 +11,46 @@ body {
 .grid {
   display: inline-block;
 }
-.white-box {
-  border: 1px solid black;
-  background-color: white;
+.box {
   color: black;
   display: inline-block;
+  border: 1px solid black;
+}
+.white-box {
+  background-color: white;
   position: relative;
-  width: 40px;
-  height: 40px;
 }
 .black-box {
-  border: 1px solid black;
   background-color: black;
-  color: black;
-  display: inline-block;
-  width: 40px;
-  height: 40px;
+
 }
 .letter {
-  font-size: 35px;
+  font-size: 1em;
   position: absolute;
   top: 0px;
   bottom: 0px;
   left: 0px;
   right: 0px;
-  text-align: center;
+
+  /* Internet Explorer 10 */
+  display:-ms-flexbox;
+  -ms-flex-pack:center;
+  -ms-flex-align:center;
+
+  /* Firefox */
+  display:-moz-box;
+  -moz-box-pack:center;
+  -moz-box-align:center;
+
+  /* Safari, Opera, and Chrome */
+  display:-webkit-box;
+  -webkit-box-pack:center;
+  -webkit-box-align:center;
+
+  /* W3C */
+  display:box;
+  box-pack:center;
+  box-align:center;
 }
 .number {
   padding-left: 2px;
@@ -70,11 +85,4 @@ body {
   margin: 0;
   cursor: default;
   position: relative;
-}
-.scroll-pane {
-  height: 50px;
-  overflow: auto;
-}
-.scroll-pane p {
-  margin: 5px 0;
 }
