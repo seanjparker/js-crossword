@@ -39,7 +39,7 @@ function crossword() {
     for (var y = 0; y < this.height; y++) {
       this.grid[y] = [];
       for (var x = 0; x < this.width; x++) {
-        this.grid[y][x] = new cell(x, y, false, 'undefined', 'undefined');
+        this.grid[y][x] = new cell(x, y, false, undefined, undefined);
       }
     }
   }
@@ -78,38 +78,57 @@ function crossword() {
     }
   }
 
+  this.checkCrossword = function() {
+    for (var y = 0; y < this.height; y++) {
+      for (var x = 0; x < this.width; x++) {
+        if (this.grid[y][x].isWhite && this.grid[y][x].letter !== this.grid[y][x].correctLetter)
+          return false;
+      }
+    }
+    return true;
+  }
+
   this.getXAndY = function(cellToParse) {
     return cellToParse.attr('class').split(" ")[1].split("?");
   }
 
   this.updateLetter = function(newLetter) {
     var active = $('#cell-active');
-    var pos = _this.getXAndY(active);
+    var pos = this.getXAndY(active);
     var cell = active.children(".letter").empty();
 
-    if (newLetter !== '' || typeof newLetter == 'undefined') {
-      _this.grid[pos[1]][pos[0]].letter = newLetter;
-      $(_this.grid[pos[1]][pos[0]].createHTMLForLetter()).appendTo(cell);
+    if (newLetter !== '' || typeof newLetter == undefined) {
+      this.grid[pos[1]][pos[0]].letter = newLetter;
+      $(this.grid[pos[1]][pos[0]].createHTMLForLetter()).appendTo(cell);
     }
   }
 
+  this.updateActive = function() {
+    //var pos = this.getXAndY($('#cell-active'));
+    //var x = parseInt(pos[0]) + this.grid[y][x].direction === "A" ? 1 : 0;
+    //var y = parseInt(pos[1]) + this.grid[y][x].direction === "D" ? 1 : 0;
+    //if (this.grid[y][x].isWhite) {
+    //  $(".row > div").removeAttr('id', 'cell-active');
+    //  $(".row > div").attr('id', 'cell-active');
+    //}
+  }
+
   this.setKeyHandlers = function() {
-    this.container.find(".row > div").click(function(e) {
+    $(".row > div").click(function(e) {
       if($(this).hasClass("white-box")) {
-        var cell = $(this);
         $(".row > div").removeAttr('id', 'cell-active');
-        cell.attr('id', 'cell-active');
+        $(this).attr('id', 'cell-active');
       }
     });
     $(document).keypress(function(e) {
       var character = String.fromCharCode(e.which).toUpperCase();
       _this.updateLetter(character);
+      _this.updateActive();
     });
     $(document).on('keydown', function(e) {
       var key = e.key;
-      if (key === 'Backspace' || key === 'Delete') {
+      if (key === 'Backspace' || key === 'Delete')
         _this.updateLetter('');
-      }
     });
   }
 }

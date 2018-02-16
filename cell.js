@@ -13,10 +13,10 @@ function cell(x, y, isWhite, letter, number, direction, correctLetter) {
     if (this.isWhite) {
       var letterCell = $('<div class="letter"></div>').appendTo(cellData);
       var numberCell = $('<div class="number"></div>').appendTo(cellData);
-      if (this.letter !== 'undefined') {
+      if (this.letter !== undefined) {
         $('<span>' + letter + '</span>').appendTo(letterCell);
       }
-      if (this.number !== 'undefined') {
+      if (this.number !== undefined) {
         $('<span>' + this.number + '</span>').appendTo(numberCell);
       }
     }
