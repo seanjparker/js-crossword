@@ -24,7 +24,7 @@ function crossword() {
   }
 
   this.loadCrossword = function(loadSuccessful) {
-    $.getJSON(this.crosswordID + '.json', {
+    $.getJSON('crosswords/' + this.crosswordID + '.json', {
     })
     .done(function(jsondata) {
       _this.crosswordData = jsondata;
