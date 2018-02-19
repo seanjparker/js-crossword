@@ -21,6 +21,7 @@ function crossword() {
       _this.initGrid()
       _this.parseCrosswordData();
       _this.drawGrid();
+      _this.drawClues();
       _this.setKeyHandlers();
     });
   }
@@ -51,20 +52,29 @@ function crossword() {
   //We find the clues and words and store the data
   //Then we set each cell with the correct letter and the x and y co-ords
   this.parseCrosswordData = function() {
-    this.clues = [];
+    this.clues = {
+      'A':[],
+      'D':[]
+    };
     this.words = [];
 
     var data = this.crosswordData.data;
 
     for (var i = 0; i < data.length; i++) {
-      this.clues.push(data[i].c);
       this.words.push(data[i].w);
       var x = data[i].x;
       var y = data[i].y;
       var d = data[i].d;
+
       //At the start of the word, set the super-script number
       this.grid[y][x].number = data[i].n;
       this.grid[y][x].direction = d;
+
+      //Add the clues with the direction and number
+      this.clues[d].push({
+        'n':data[i].n,
+        'c':data[i].c
+      });
 
       for (var c = 0; c < this.words[i].length; c++) {
         var yOff = y + (d == 'D' ? c : 0);
@@ -92,6 +102,30 @@ function crossword() {
         $(this.grid[y][x].createHTML()).appendTo(row);
       }
     }
+  }
+
+  this.drawClues = function() {
+    var cluediv = $('<div class="clues"></div>').appendTo('#crosswordStart');
+    cluediv.append('<h4 class="cluelabel">Across</h4>');
+    var aol = $('<div class="across scroll-pane"></div>').appendTo(cluediv);
+    cluediv.append('<h4 class="cluelabel">Down</h4>');
+    var dol = $('<div class="down scroll-pane"></div>').appendTo(cluediv);
+    for (var key in this.clues) {
+      for (var i = 0; i < this.clues[key].length; i++) {
+        var clue = this.clues[key][i];
+        var li;
+        if (key == 'A') {
+          li = $('<p></p>').appendTo(aol);
+        } else {
+          li = $('<p></p>').appendTo(dol);
+        }
+        li.addClass('c'+key+clue.n);
+        li.text(clue.n + '. ' + clue.c);
+      }
+    }
+    $(function() {
+      $('.scroll-pane').jScrollPane();
+    });
   }
 
   this.checkCrossword = function() {
